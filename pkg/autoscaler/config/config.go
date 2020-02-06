@@ -22,9 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"knative.dev/serving/pkg/apis/autoscaling"
-
 	corev1 "k8s.io/api/core/v1"
+	"knative.dev/serving/pkg/apis/autoscaling"
 )
 
 const (
@@ -71,6 +70,8 @@ type Config struct {
 	TickInterval             time.Duration
 
 	ScaleToZeroGracePeriod time.Duration
+
+	PodAutoscalerClass string
 }
 
 // NewConfigFromMap creates a Config from the supplied map
@@ -184,6 +185,11 @@ func NewConfigFromMap(data map[string]string) (*Config, error) {
 		} else {
 			*dur.field = val
 		}
+	}
+
+	lc.PodAutoscalerClass = autoscaling.KPA
+	if pac, ok := data["pod-autoscaler-class"]; ok {
+		lc.PodAutoscalerClass = pac
 	}
 
 	return validate(lc)
