@@ -44,18 +44,23 @@ type Decider struct {
 // DeciderSpec is the parameters in which the Revision should scaled.
 type DeciderSpec struct {
 	// TickInterval denotes how often we evaluate the scale suggestion.
-	TickInterval     time.Duration
-	MaxScaleUpRate   float64
+	TickInterval time.Duration
+	// MaxScaleUpRate is the maximum amount the autoscaler is allowed to
+	// scale up in a single evaluation cycle
+	MaxScaleUpRate float64
+	// MaxScaleDownRate is the maximum amount the autoscaler is allowed
+	// to scale down in a single evaluation cycle
 	MaxScaleDownRate float64
-	// The metric used for scaling, i.e. concurrency, rps.
+	// ScalingMetric is the metric used for scaling, i.e. concurrency, rps.
 	ScalingMetric string
-	// The value of scaling metric per pod that we target to maintain.
+	// TargetValue is the value of scaling metric per pod that we target to maintain.
 	// TargetValue <= TotalValue.
 	TargetValue float64
-	// The total value of scaling metric that a pod can maintain.
+	// TotalValue is the total value of scaling metric that a pod can maintain.
 	TotalValue float64
-	// The burst capacity that user wants to maintain without queuing at the POD level.
-	// Note, that queueing still might happen due to the non-ideal load balancing.
+	// TargetBurstCapacity is the burst capacity that user wants to maintain
+	// without queuing at the POD level.  Note, that queueing still might happen
+	// due to the non-ideal load balancing.
 	TargetBurstCapacity float64
 	// ActivatorCapacity is the single activator capacity, for subsetting.
 	ActivatorCapacity float64
@@ -66,14 +71,14 @@ type DeciderSpec struct {
 	PanicThreshold float64
 	// StableWindow is needed to determine when to exit panic mode.
 	StableWindow time.Duration
-	// The name of the k8s service for pod information.
+	// ServiceName is the name of the k8s service for pod information.
 	ServiceName string
 }
 
 // DeciderStatus is the current scale recommendation.
 type DeciderStatus struct {
 	// DesiredScale is the target number of instances that autoscaler
-	// this revision needs.
+	// decided this revision needs.
 	DesiredScale int32
 
 	// ExcessBurstCapacity is the difference between spare capacity
