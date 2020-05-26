@@ -86,7 +86,8 @@ type config struct {
 	UserPort               int    `split_words:"true" required:"true"`
 	RevisionTimeoutSeconds int    `split_words:"true" required:"true"`
 	ServingReadinessProbe  string `split_words:"true" required:"true"`
-	EnableProfiling        bool   `split_words:"true"` // optional
+	EnableProfiling        bool   `split_words:"true"`                // optional
+	EnableMetrics          bool   `split_words:"true" default:"true"` // optional
 
 	// Logging configuration
 	ServingLoggingConfig         string `split_words:"true" required:"true"`
@@ -115,7 +116,7 @@ type config struct {
 }
 
 // Make handler a closure for testing.
-func proxyHandler(reqChan chan network.ReqEvent, breaker *queue.Breaker, tracingEnabled bool, next http.Handler) http.HandlerFunc {
+func proxyHandler(reqChan chan network.ReqEvent, breaker *queue.Breaker, tracingEnabled, metricsEnabled bool, next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if network.IsKubeletProbe(r) {
 			next.ServeHTTP(w, r)
@@ -129,14 +130,17 @@ func proxyHandler(reqChan chan network.ReqEvent, breaker *queue.Breaker, tracing
 		}
 
 		// Metrics for autoscaling.
-		in, out := network.ReqIn, network.ReqOut
-		if activator.Name == network.KnativeProxyHeader(r) {
-			in, out = network.ProxiedIn, network.ProxiedOut
+		if metricsEnabled {
+			in, out := network.ReqIn, network.ReqOut
+			if activator.Name == network.KnativeProxyHeader(r) {
+				in, out = network.ProxiedIn, network.ProxiedOut
+			}
+			reqChan <- network.ReqEvent{Time: time.Now(), Type: in}
+			defer func() {
+				reqChan <- network.ReqEvent{Time: time.Now(), Type: out}
+			}()
 		}
-		reqChan <- network.ReqEvent{Time: time.Now(), Type: in}
-		defer func() {
-			reqChan <- network.ReqEvent{Time: time.Now(), Type: out}
-		}()
+
 		network.RewriteHostOut(r)
 
 		// Enforce queuing and concurrency limits.
@@ -355,20 +359,23 @@ func main() {
 	reportTicker := time.NewTicker(reportingPeriod)
 	defer reportTicker.Stop()
 
-	go queue.ReportStats(time.Now(), reqChan, reportTicker.C, promStatReporter.Report)
-
 	// Setup probe to run for checking user-application healthiness.
 	probe := buildProbe(env.ServingReadinessProbe)
 	healthState := &health.State{}
 
 	server := buildServer(env, healthState, probe, reqChan, logger)
 	adminServer := buildAdminServer(healthState, logger)
-	metricsServer := buildMetricsServer(promStatReporter)
 
 	servers := map[string]*http.Server{
-		"main":    server,
-		"admin":   adminServer,
-		"metrics": metricsServer,
+		"main":  server,
+		"admin": adminServer,
+	}
+
+	if env.EnableMetrics {
+		go queue.ReportStats(time.Now(), reqChan, reportTicker.C, promStatReporter.Report)
+
+		metricsServer := buildMetricsServer(promStatReporter)
+		servers["metrics"] = metricsServer
 	}
 
 	if env.EnableProfiling {
@@ -445,6 +452,7 @@ func buildServer(env config, healthState *health.State, rp *readiness.Probe, req
 	breaker := buildBreaker(env)
 	metricsSupported := supportsMetrics(env, logger)
 	tracingEnabled := env.TracingConfigBackend != tracingconfig.None
+	metricsEnabled := env.EnableMetrics
 
 	// Create queue handler chain.
 	// Note: innermost handlers are specified first, ie. the last handler in the chain will be executed first.
@@ -452,7 +460,7 @@ func buildServer(env config, healthState *health.State, rp *readiness.Probe, req
 	if metricsSupported {
 		composedHandler = requestAppMetricsHandler(composedHandler, breaker, env)
 	}
-	composedHandler = proxyHandler(reqChan, breaker, tracingEnabled, composedHandler)
+	composedHandler = proxyHandler(reqChan, breaker, tracingEnabled, metricsEnabled, composedHandler)
 	composedHandler = queue.ForwardedShimHandler(composedHandler)
 	composedHandler = queue.TimeToFirstByteTimeoutHandler(composedHandler,
 		time.Duration(env.RevisionTimeoutSeconds)*time.Second, "request timeout")

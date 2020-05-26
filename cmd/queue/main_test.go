@@ -78,7 +78,7 @@ func TestHandlerReqEvent(t *testing.T) {
 	params := queue.BreakerParams{QueueDepth: 10, MaxConcurrency: 10, InitialCapacity: 10}
 	breaker := queue.NewBreaker(params)
 	reqChan := make(chan network.ReqEvent, 10)
-	h := proxyHandler(reqChan, breaker, true /*tracingEnabled*/, proxy)
+	h := proxyHandler(reqChan, breaker, true /*tracingEnabled*/, true /* metricsEnabled */, proxy)
 
 	writer := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodPost, "http://example.com", nil)
@@ -96,6 +96,59 @@ func TestHandlerReqEvent(t *testing.T) {
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("Timed out waiting for an event to be intercepted")
+	}
+}
+
+func TestMetricsDisabled(t *testing.T) {
+	var httpHandler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {}
+	server := httptest.NewServer(httpHandler)
+	serverURL, _ := url.Parse(server.URL)
+
+	defer server.Close()
+	proxy := httputil.NewSingleHostReverseProxy(serverURL)
+	params := queue.BreakerParams{QueueDepth: 10, MaxConcurrency: 10, InitialCapacity: 10}
+	breaker := queue.NewBreaker(params)
+	reqChan := make(chan network.ReqEvent, 10)
+
+	h := proxyHandler(reqChan, breaker, true, false, proxy)
+	writer := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "http://example.com", nil)
+
+	h(writer, req)
+	select {
+	case <-reqChan:
+		t.Fatal("expected metric not to be sent to reqChan")
+	default:
+	}
+}
+
+func BenchmarkMetrics(b *testing.B) {
+	for _, metricsEnabled := range []bool{true, false} {
+		b.Run(fmt.Sprintf("metricsEnabled=%v", metricsEnabled), func(b *testing.B) {
+			var httpHandler http.HandlerFunc = func(w http.ResponseWriter, r *http.Request) {}
+			server := httptest.NewServer(httpHandler)
+			serverURL, _ := url.Parse(server.URL)
+
+			defer server.Close()
+			proxy := httputil.NewSingleHostReverseProxy(serverURL)
+			params := queue.BreakerParams{QueueDepth: 10, MaxConcurrency: 10, InitialCapacity: 10}
+			breaker := queue.NewBreaker(params)
+			reqChan := make(chan network.ReqEvent, 10)
+			defer close(reqChan)
+
+			go queue.ReportStats(time.Now(), reqChan, time.NewTicker(1*time.Second).C, func(float64, float64, float64, float64) {})
+
+			b.RunParallel(func(pb *testing.PB) {
+
+				h := proxyHandler(reqChan, breaker, true, metricsEnabled, proxy)
+				req := httptest.NewRequest(http.MethodPost, "http://example.com", nil)
+				writer := httptest.NewRecorder()
+
+				for pb.Next() {
+					h(writer, req)
+				}
+			})
+		})
 	}
 }
 
@@ -462,7 +515,7 @@ func TestQueueTraceSpans(t *testing.T) {
 					Base: pkgnet.AutoTransport,
 				}
 
-				h := proxyHandler(reqChan, breaker, true /*tracingEnabled*/, proxy)
+				h := proxyHandler(reqChan, breaker, true /*tracingEnabled*/, true /* metricsEnabled */, proxy)
 				h(writer, req)
 			} else {
 				h := knativeProbeHandler(healthState, tc.prober, true /* isAggresive*/, true /*tracingEnabled*/, nil, config{}, logger)
@@ -524,29 +577,33 @@ func BenchmarkProxyHandler(b *testing.B) {
 	tests := []struct {
 		label   string
 		breaker *queue.Breaker
-	}{{
-		label:   "breaker-10",
-		breaker: queue.NewBreaker(queue.BreakerParams{QueueDepth: 10, MaxConcurrency: 10, InitialCapacity: 10}),
-	}, {
-		label:   "breaker-infinite",
-		breaker: nil,
-	}}
+	}{
+		// 	{
+		// 	label:   "breaker-10",
+		// 	breaker: queue.NewBreaker(queue.BreakerParams{QueueDepth: 10, MaxConcurrency: 10, InitialCapacity: 10}),
+		// }, {
+		{
+			label:   "breaker-infinite",
+			breaker: nil,
+		}}
 	for _, tc := range tests {
-		h := proxyHandler(reqChan, tc.breaker, true /*tracingEnabled*/, baseHandler)
-		b.Run(fmt.Sprintf("sequential-%s", tc.label), func(b *testing.B) {
-			resp := httptest.NewRecorder()
-			for j := 0; j < b.N; j++ {
-				h(resp, req)
-			}
-		})
-		b.Run(fmt.Sprintf("parallel-%s", tc.label), func(b *testing.B) {
-			b.RunParallel(func(pb *testing.PB) {
+		for _, me := range []bool{true, false} {
+			h := proxyHandler(reqChan, tc.breaker, true /*tracingEnabled*/, me /*metricsEnabled*/, baseHandler)
+			b.Run(fmt.Sprintf("sequential-%s-metrics-%v", tc.label, me), func(b *testing.B) {
 				resp := httptest.NewRecorder()
-				for pb.Next() {
+				for j := 0; j < b.N; j++ {
 					h(resp, req)
 				}
 			})
-		})
+			b.Run(fmt.Sprintf("parallel-%s-metrics-%v", tc.label, me), func(b *testing.B) {
+				b.RunParallel(func(pb *testing.PB) {
+					resp := httptest.NewRecorder()
+					for pb.Next() {
+						h(resp, req)
+					}
+				})
+			})
+		}
 	}
 }
 
