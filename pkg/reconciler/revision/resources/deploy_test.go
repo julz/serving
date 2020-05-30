@@ -203,7 +203,7 @@ var (
 					serving.RevisionUID: "1234",
 				},
 			},
-			ProgressDeadlineSeconds: ptr.Int32(int32(deployment.ProgressDeadlineDefault.Seconds())),
+			ProgressDeadlineSeconds: ptr.Int32(0),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -341,7 +341,7 @@ func withAppendedVolumes(volumes ...corev1.Volume) podSpecOption {
 	}
 }
 
-func makeDeployment(opts ...deploymentOption) *appsv1.Deployment {
+func v1deployment(opts ...deploymentOption) *appsv1.Deployment {
 	deploy := defaultDeployment.DeepCopy()
 	for _, option := range opts {
 		option(deploy)
@@ -741,58 +741,42 @@ func TestMakeDeployment(t *testing.T) {
 		name string
 		rev  *v1.Revision
 		want *appsv1.Deployment
+		dc   deployment.Config
 	}{{
-		name: "with concurrency=1",
+		name: "defaults",
 		rev: revision("bar", "foo",
 			withoutLabels,
 			withContainerConcurrency(1),
 			func(revision *v1.Revision) {
-				container(revision.Spec.GetContainer(),
-					withReadinessProbe(corev1.Handler{
-						TCPSocket: &corev1.TCPSocketAction{
-							Host: "127.0.0.1",
-							Port: intstr.FromInt(12345),
-						},
-					}),
-				)
-			},
-		),
-		want: makeDeployment(),
-	}, {
-		name: "with owner",
-		rev: revision("bar", "foo",
-			withoutLabels,
-			withOwnerReference("parent-config"),
-			func(revision *v1.Revision) {
-				container(revision.Spec.GetContainer(),
-					withReadinessProbe(corev1.Handler{
-						TCPSocket: &corev1.TCPSocketAction{
-							Host: "127.0.0.1",
-							Port: intstr.FromInt(12345),
-						},
-					}),
-				)
-			},
-		),
-		want: makeDeployment(),
+				container(revision.Spec.GetContainer(), withTCPReadinessProbe())
+			}),
+		want: defaultDeployment.DeepCopy(),
 	}, {
 		name: "with sidecar annotation override",
-		rev: revision("bar", "foo", withoutLabels, func(revision *v1.Revision) {
-			revision.ObjectMeta.Annotations = map[string]string{
-				sidecarIstioInjectAnnotation: "false",
-			}
-			container(revision.Spec.GetContainer(),
-				withReadinessProbe(corev1.Handler{
-					TCPSocket: &corev1.TCPSocketAction{
-						Host: "127.0.0.1",
-						Port: intstr.FromInt(12345),
-					},
-				}),
-			)
-		}),
-		want: makeDeployment(func(deploy *appsv1.Deployment) {
+		rev: revision("bar", "foo",
+			withoutLabels,
+			func(revision *v1.Revision) {
+				container(revision.Spec.GetContainer(), withTCPReadinessProbe())
+				revision.ObjectMeta.Annotations = map[string]string{
+					sidecarIstioInjectAnnotation: "false",
+				}
+			}),
+		want: v1deployment(func(deploy *appsv1.Deployment) {
 			deploy.ObjectMeta.Annotations[sidecarIstioInjectAnnotation] = "false"
 			deploy.Spec.Template.ObjectMeta.Annotations[sidecarIstioInjectAnnotation] = "false"
+		}),
+	}, {
+		name: "with ProgressDeadline overridden in config",
+		dc: deployment.Config{
+			ProgressDeadline: 42 * time.Second,
+		},
+		rev: revision("bar", "foo",
+			withoutLabels,
+			func(revision *v1.Revision) {
+				container(revision.Spec.GetContainer(), withTCPReadinessProbe())
+			}),
+		want: v1deployment(func(deploy *appsv1.Deployment) {
+			deploy.Spec.ProgressDeadlineSeconds = ptr.Int32(42)
 		}),
 	}}
 
@@ -806,7 +790,7 @@ func TestMakeDeployment(t *testing.T) {
 			}
 			test.want.Spec.Template.Spec = *podSpec
 			got, err := MakeDeployment(test.rev, &logConfig, &traceConfig,
-				&network.Config{}, &obsConfig, &asConfig, &deploymentConfig)
+				&network.Config{}, &obsConfig, &asConfig, &test.dc)
 			if err != nil {
 				t.Fatal("got unexpected error:", err)
 			}
@@ -814,41 +798,5 @@ func TestMakeDeployment(t *testing.T) {
 				t.Error("MakeDeployment (-want, +got) =", diff)
 			}
 		})
-	}
-}
-
-func TestProgressDeadlineOverride(t *testing.T) {
-	rev := revision("bar", "foo",
-		withoutLabels,
-		func(revision *v1.Revision) {
-			container(revision.Spec.GetContainer(),
-				withReadinessProbe(corev1.Handler{
-					TCPSocket: &corev1.TCPSocketAction{
-						Host: "127.0.0.1",
-						Port: intstr.FromInt(12345),
-					},
-				}),
-			)
-		},
-	)
-	want := makeDeployment(func(d *appsv1.Deployment) {
-		d.Spec.ProgressDeadlineSeconds = ptr.Int32(42)
-	})
-
-	dc := &deployment.Config{
-		ProgressDeadline: 42 * time.Second,
-	}
-	podSpec, err := makePodSpec(rev, &logConfig, &traceConfig, &obsConfig, &asConfig, dc)
-	if err != nil {
-		t.Fatal("makePodSpec returned error:", err)
-	}
-	want.Spec.Template.Spec = *podSpec
-	got, err := MakeDeployment(rev, &logConfig, &traceConfig,
-		&network.Config{}, &obsConfig, &asConfig, dc)
-	if err != nil {
-		t.Fatal("MakeDeployment returned error:", err)
-	}
-	if !cmp.Equal(want, got, cmp.AllowUnexported(resource.Quantity{})) {
-		t.Error("MakeDeployment (-want, +got) =", cmp.Diff(want, got, cmp.AllowUnexported(resource.Quantity{})))
 	}
 }
