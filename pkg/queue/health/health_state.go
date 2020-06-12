@@ -20,15 +20,8 @@ import (
 	"io"
 	"net/http"
 	"sync"
-)
 
-const (
-	// Return `queue` as body for 200 responses to indicate the response is from queue-proxy.
-	aliveBody = "queue"
-	// Return `queue not ready` as body for 503 response for queue not yet ready.
-	notAliveBody = "queue not ready"
-	// Return `shutting down` as body for 410 response if the queue got a shutdown request.
-	shuttingDownBody = "shutting down"
+	"knative.dev/serving/pkg/queue"
 )
 
 // State holds state about the current healthiness of the component.
@@ -96,17 +89,15 @@ func (h *State) drainFinished() {
 // shutdown).
 func (h *State) HandleHealthProbe(prober func() bool, isAggressive bool, w http.ResponseWriter) {
 	sendAlive := func() {
-		io.WriteString(w, aliveBody)
+		io.WriteString(w, queue.Name)
 	}
 
 	sendNotAlive := func() {
 		w.WriteHeader(http.StatusServiceUnavailable)
-		io.WriteString(w, notAliveBody)
 	}
 
 	sendShuttingDown := func() {
 		w.WriteHeader(http.StatusGone)
-		io.WriteString(w, shuttingDownBody)
 	}
 
 	switch {
