@@ -30,6 +30,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"go.opencensus.io/plugin/ochttp"
+	"go.uber.org/zap"
 	pkgnet "knative.dev/pkg/network"
 	"knative.dev/pkg/ptr"
 	"knative.dev/pkg/tracing"
@@ -507,6 +508,28 @@ func BenchmarkProxyHandler(b *testing.B) {
 				}
 			})
 		})
+	}
+}
+
+func BenchmarkKnativeProbeHandler(b *testing.B) {
+	ts := httptest.NewServer(
+		// benchmark probe returning false since this is the case that happens repeatedly during startup
+		knativeProbeHandler(&health.State{}, func() bool { return false }, true, false, nil, zap.NewNop().Sugar()))
+
+	req, err := http.NewRequest("GET", ts.URL, nil)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	req.Header.Set(network.ProbeHeaderName, queue.Name)
+
+	for i := 0; i < b.N; i++ {
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			b.Fatal(err)
+		}
+
+		resp.Body.Close()
 	}
 }
 
