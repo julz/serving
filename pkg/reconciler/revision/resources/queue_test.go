@@ -228,10 +228,15 @@ func TestMakeQueueContainer(t *testing.T) {
 		name: "custom TimeoutSeconds",
 		rev: revision("bar", "foo",
 			withContainers(containers),
-			withContainerConcurrency(1)),
+			withContainerConcurrency(1),
+			func(revision *v1.Revision) {
+				revision.Spec.TimeoutSeconds = ptr.Int64(99)
+			},
+		),
+
 		want: queueContainer(func(c *corev1.Container) {
 			c.Env = env(map[string]string{
-				"REVISION_TIMEOUT_SECONDS": "45",
+				"REVISION_TIMEOUT_SECONDS": "99",
 			})
 		}),
 	}, {
