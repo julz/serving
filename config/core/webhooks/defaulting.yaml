@@ -26,5 +26,6 @@ webhooks:
       namespace: knative-serving
   failurePolicy: Fail
   sideEffects: None
+  reinvocationPolicy: IfNeeded
   name: webhook.serving.knative.dev
   timeoutSeconds: 10
