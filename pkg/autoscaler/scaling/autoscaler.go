@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/julz/window"
 	"go.uber.org/zap"
 
 	"knative.dev/pkg/logging"
@@ -53,6 +54,9 @@ type autoscaler struct {
 	// State in panic mode.
 	panicTime    time.Time
 	maxPanicPods int32
+
+	// State in delay mode.
+	delayWindow *window.TimedMax
 
 	// specMux guards the current DeciderSpec.
 	specMux     sync.RWMutex
@@ -117,6 +121,8 @@ func newAutoscaler(
 
 		panicTime:    pt,
 		maxPanicPods: int32(curC),
+
+		delayWindow: window.NewTimedMax(1*time.Minute, 1*time.Second),
 	}
 }
 
@@ -165,6 +171,9 @@ func (a *autoscaler) Scale(ctx context.Context, now time.Time) ScaleResult {
 
 	// Put the scaling metric to logs.
 	logger = logger.With(zap.String("metric", metricName))
+
+	a.delayWindow.Record(now, observedStableValue)
+	observedStableValue = a.delayWindow.Current()
 
 	if err != nil {
 		if err == metrics.ErrNoData {
