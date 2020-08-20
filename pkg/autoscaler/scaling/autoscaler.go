@@ -122,7 +122,7 @@ func newAutoscaler(
 		panicTime:    pt,
 		maxPanicPods: int32(curC),
 
-		delayWindow: window.NewTimedMax(1*time.Minute, 1*time.Second),
+		delayWindow: window.NewTimedMax(5*time.Minute, 1*time.Second),
 	}
 }
 
