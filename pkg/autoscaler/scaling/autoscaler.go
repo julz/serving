@@ -172,9 +172,6 @@ func (a *autoscaler) Scale(ctx context.Context, now time.Time) ScaleResult {
 	// Put the scaling metric to logs.
 	logger = logger.With(zap.String("metric", metricName))
 
-	a.delayWindow.Record(now, observedStableValue)
-	observedStableValue = a.delayWindow.Current()
-
 	if err != nil {
 		if err == metrics.ErrNoData {
 			logger.Debug("No data to scale on yet")
@@ -248,6 +245,10 @@ func (a *autoscaler) Scale(ctx context.Context, now time.Time) ScaleResult {
 	} else {
 		logger.Debug("Operating in stable mode.")
 	}
+
+	// delay scale-down decisions by a configurable window.
+	a.delayWindow.Record(now, float64(desiredPodCount))
+	desiredPodCount = int32(a.delayWindow.Current())
 
 	// Here we compute two numbers: excess burst capacity and number of activators
 	// for subsetting.
