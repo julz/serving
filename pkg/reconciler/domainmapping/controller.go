@@ -19,11 +19,12 @@ package domainmapping
 import (
 	"context"
 
+	network "knative.dev/networking/pkg"
+	netclient "knative.dev/networking/pkg/client/injection/client"
+	ingressinformer "knative.dev/networking/pkg/client/injection/informers/networking/v1alpha1/ingress"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
-
-	network "knative.dev/networking/pkg"
 	"knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/domainmapping"
 	kindreconciler "knative.dev/serving/pkg/client/injection/reconciler/serving/v1alpha1/domainmapping"
 	"knative.dev/serving/pkg/reconciler/domainmapping/config"
@@ -32,8 +33,13 @@ import (
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 	logger := logging.FromContext(ctx)
 	domainmappingInformer := domainmapping.Get(ctx)
+	ingressInformer := ingressinformer.Get(ctx)
 
-	r := &Reconciler{}
+	r := &Reconciler{
+		ingressLister: ingressInformer.Lister(),
+		netclient:     netclient.Get(ctx),
+	}
+
 	impl := kindreconciler.NewImpl(ctx, r, func(impl *controller.Impl) controller.Options {
 		configsToResync := []interface{}{
 			&network.Config{},

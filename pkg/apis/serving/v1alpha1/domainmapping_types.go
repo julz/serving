@@ -17,7 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -67,6 +69,8 @@ type DomainMappingList struct {
 
 // DomainMappingSpec describes the DomainMapping the user wishes to exist.
 type DomainMappingSpec struct {
+	// Ref points to an Addressable.
+	Ref corev1.ObjectReference `json:"ref"`
 }
 
 // DomainMappingStatus describe the current state of the DomainMapping.
