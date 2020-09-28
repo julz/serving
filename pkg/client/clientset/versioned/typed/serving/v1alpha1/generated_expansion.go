@@ -20,6 +20,8 @@ package v1alpha1
 
 type ConfigurationExpansion interface{}
 
+type DomainMappingExpansion interface{}
+
 type RevisionExpansion interface{}
 
 type RouteExpansion interface{}
