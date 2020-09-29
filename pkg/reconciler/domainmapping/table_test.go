@@ -33,6 +33,7 @@ import (
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
+	pkgnet "knative.dev/pkg/network"
 	pkgreconciler "knative.dev/pkg/reconciler"
 	"knative.dev/serving/pkg/apis/serving/v1alpha1"
 	servingclient "knative.dev/serving/pkg/client/injection/client/fake"
@@ -76,6 +77,25 @@ func TestReconcile(t *testing.T) {
 		WantEvents: []string{
 			Eventf(corev1.EventTypeNormal, "Created", "Created Ingress %q", "first-reconcile.com"),
 		},
+	}, {
+		Name: "ingress becomes ready",
+		Key:  "default/becomes-ready.org",
+		Objects: []runtime.Object{
+			DomainMapping("default", "becomes-ready.org", WithRef("default", "target")),
+			ingress(t, DomainMapping("default", "becomes-ready.org", WithRef("default", "target")),
+				TestIngressClass,
+				WithIngressStatus(readyIngressStatus()),
+			),
+		},
+		WantStatusUpdates: []clientgotesting.UpdateActionImpl{{
+			Object: DomainMapping("default", "becomes-ready.org",
+				WithRef("default", "target"),
+				WithURL("https", "becomes-ready.org"),
+				WithAddress("https", "becomes-ready.org"),
+				WithInitDomainMappingConditions,
+				WithIngressConditionReady,
+			),
+		}},
 	}}
 
 	table.Test(t, MakeFactory(func(ctx context.Context, listers *Listers, cmw configmap.Watcher) controller.Reconciler {
@@ -127,15 +147,6 @@ func DomainMapping(namespace, name string, opt ...DomainMappingOption) *v1alpha1
 	return dm
 }
 
-func ingress(t *testing.T, dm *v1alpha1.DomainMapping, ingressClass string) *netv1alpha1.Ingress {
-	ing, err := resources.MakeIngress(dm, ingressClass)
-	if err != nil {
-		t.Fatalf("MakeIngress() = %v, expected no error", err)
-	}
-
-	return ing
-}
-
 func WithRef(namespace, name string) DomainMappingOption {
 	return func(dm *v1alpha1.DomainMapping) {
 		dm.Spec.Ref.Namespace = namespace
@@ -164,4 +175,45 @@ func WithInitDomainMappingConditions(dm *v1alpha1.DomainMapping) {
 
 func WithIngressConditionNotConfigured(dm *v1alpha1.DomainMapping) {
 	dm.Status.MarkIngressNotConfigured()
+}
+
+func WithIngressConditionReady(dm *v1alpha1.DomainMapping) {
+	dm.Status.MarkIngressReady()
+}
+
+type IngressOption func(*netv1alpha1.Ingress)
+
+func ingress(t *testing.T, dm *v1alpha1.DomainMapping, ingressClass string, io ...IngressOption) *netv1alpha1.Ingress {
+	ing, err := resources.MakeIngress(dm, ingressClass)
+	if err != nil {
+		t.Fatalf("MakeIngress() = %v, expected no error", err)
+	}
+
+	for _, o := range io {
+		o(ing)
+	}
+
+	return ing
+}
+
+func WithIngressStatus(status netv1alpha1.IngressStatus) IngressOption {
+	return func(ing *netv1alpha1.Ingress) {
+		ing.Status = status
+	}
+}
+
+func readyIngressStatus() netv1alpha1.IngressStatus {
+	status := netv1alpha1.IngressStatus{}
+	status.InitializeConditions()
+	status.MarkNetworkConfigured()
+	status.MarkLoadBalancerReady(
+		[]netv1alpha1.LoadBalancerIngressStatus{{
+			DomainInternal: pkgnet.GetServiceHostname("istio-ingressgateway", "istio-system"),
+		}},
+		[]netv1alpha1.LoadBalancerIngressStatus{{
+			DomainInternal: pkgnet.GetServiceHostname("private-istio-ingressgateway", "istio-system"),
+		}},
+	)
+
+	return status
 }

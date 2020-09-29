@@ -50,9 +50,13 @@ func (r *Reconciler) ReconcileKind(ctx context.Context, dm *v1alpha1.DomainMappi
 	dm.Status.URL = url
 	dm.Status.Address = &duckv1.Addressable{URL: url}
 
-	_, err := r.reconcileIngressResources(ctx, dm, ingressClass)
+	ing, err := r.reconcileIngressResources(ctx, dm, ingressClass)
 	if err != nil {
 		return err
+	}
+
+	if ing.GetObjectMeta().GetGeneration() == ing.Status.ObservedGeneration {
+		dm.Status.PropagateIngressStatus(ing.Status)
 	}
 
 	return nil

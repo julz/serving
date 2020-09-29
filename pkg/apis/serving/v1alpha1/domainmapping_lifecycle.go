@@ -16,7 +16,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"knative.dev/networking/pkg/apis/networking/v1alpha1"
 	"knative.dev/pkg/apis"
 )
 
@@ -61,9 +63,41 @@ func (rs *DomainMappingStatus) InitializeConditions() {
 	domainMappingCondSet.Manage(rs).InitializeConditions()
 }
 
+// MarkDomainMappingAvailable updated the status of the resource to
+// indicate that the domain mapping is ready.
+func (rs *DomainMappingStatus) MarkDomainMappingAvailable() {
+	domainMappingCondSet.Manage(rs).MarkTrue(DomainMappingConditionReady)
+}
+
 // MarkIngressNotConfigured changes the IngressReady condition to be unknown to reflect
 // that the Ingress does not yet have a Status
 func (rs *DomainMappingStatus) MarkIngressNotConfigured() {
 	domainMappingCondSet.Manage(rs).MarkUnknown(DomainMappingConditionIngressReady,
 		"IngressNotConfigured", "Ingress has not yet been reconciled.")
+}
+
+// MarkIngressReady changes the IngressReady condition to reflect the fact the
+// underlying Ingress is Ready.
+func (rs *DomainMappingStatus) MarkIngressReady() {
+	domainMappingCondSet.Manage(rs).MarkTrue(DomainMappingConditionIngressReady)
+}
+
+// PropagateIngressStatus update DomainMappingConditionIngressReady condition
+// in DomainMappingStatus according to IngressStatus.
+func (rs *DomainMappingStatus) PropagateIngressStatus(cs v1alpha1.IngressStatus) {
+	cc := cs.GetCondition(v1alpha1.IngressConditionReady)
+	if cc == nil {
+		rs.MarkIngressNotConfigured()
+		return
+	}
+
+	m := domainMappingCondSet.Manage(rs)
+	switch cc.Status {
+	case corev1.ConditionTrue:
+		m.MarkTrue(DomainMappingConditionIngressReady)
+	case corev1.ConditionFalse:
+		m.MarkFalse(DomainMappingConditionIngressReady, cc.Reason, cc.Message)
+	case corev1.ConditionUnknown:
+		m.MarkUnknown(DomainMappingConditionIngressReady, cc.Reason, cc.Message)
+	}
 }
