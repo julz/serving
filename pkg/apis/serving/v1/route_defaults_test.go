@@ -166,8 +166,8 @@ func TestRouteUserInfo(t *testing.T) {
 			a = map[string]string{}
 			s.SetAnnotations(a)
 		}
-		a[serving.CreatorAnnotation] = u1
-		a[serving.UpdaterAnnotation] = u2
+		a[serving.CreatorAnnotationKey] = u1
+		a[serving.UpdaterAnnotationKey] = u2
 		return s
 	}
 	tests := []struct {
@@ -182,8 +182,8 @@ func TestRouteUserInfo(t *testing.T) {
 		this: &Route{},
 		prev: nil,
 		wantAnns: map[string]string{
-			serving.CreatorAnnotation: u1,
-			serving.UpdaterAnnotation: u1,
+			serving.CreatorAnnotationKey: u1,
+			serving.UpdaterAnnotationKey: u1,
 		},
 	}, {
 		// Old objects don't have the annotation, and unless there's a change in
@@ -199,8 +199,8 @@ func TestRouteUserInfo(t *testing.T) {
 		this: withUserAnns(u1, u1, &Route{}),
 		prev: withUserAnns(u1, u1, &Route{}),
 		wantAnns: map[string]string{
-			serving.CreatorAnnotation: u1,
-			serving.UpdaterAnnotation: u1,
+			serving.CreatorAnnotationKey: u1,
+			serving.UpdaterAnnotationKey: u1,
 		},
 	}, {
 		name: "update-diff-old-object",
@@ -220,7 +220,7 @@ func TestRouteUserInfo(t *testing.T) {
 			},
 		},
 		wantAnns: map[string]string{
-			serving.UpdaterAnnotation: u2,
+			serving.UpdaterAnnotationKey: u2,
 		},
 	}, {
 		name: "update-diff-new-object",
@@ -240,8 +240,8 @@ func TestRouteUserInfo(t *testing.T) {
 			},
 		}),
 		wantAnns: map[string]string{
-			serving.CreatorAnnotation: u1,
-			serving.UpdaterAnnotation: u3,
+			serving.CreatorAnnotationKey: u1,
+			serving.UpdaterAnnotationKey: u3,
 		},
 	}}
 	for _, test := range tests {

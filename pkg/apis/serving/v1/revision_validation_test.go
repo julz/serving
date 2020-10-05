@@ -887,7 +887,7 @@ func TestRevisionTemplateSpecValidation(t *testing.T) {
 		rts: &RevisionTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					serving.QueueSideCarResourcePercentageAnnotation: "200",
+					serving.QueueSideCarResourcePercentageAnnotationKey: "200",
 				},
 			},
 			Spec: RevisionSpec{
@@ -900,14 +900,14 @@ func TestRevisionTemplateSpecValidation(t *testing.T) {
 		},
 		want: (&apis.FieldError{
 			Message: "expected 0.1 <= 200 <= 100",
-			Paths:   []string{"[" + serving.QueueSideCarResourcePercentageAnnotation + "]"},
+			Paths:   []string{"[" + serving.QueueSideCarResourcePercentageAnnotationKey + "]"},
 		}).ViaField("metadata.annotations"),
 	}, {
 		name: "Invalid queue sidecar resource percentage annotation",
 		rts: &RevisionTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					serving.QueueSideCarResourcePercentageAnnotation: "50mx",
+					serving.QueueSideCarResourcePercentageAnnotationKey: "50mx",
 				},
 			},
 			Spec: RevisionSpec{
@@ -920,7 +920,7 @@ func TestRevisionTemplateSpecValidation(t *testing.T) {
 		},
 		want: (&apis.FieldError{
 			Message: "invalid value: 50mx",
-			Paths:   []string{fmt.Sprintf("[%s]", serving.QueueSideCarResourcePercentageAnnotation)},
+			Paths:   []string{fmt.Sprintf("[%s]", serving.QueueSideCarResourcePercentageAnnotationKey)},
 		}).ViaField("metadata.annotations"),
 	}, {
 		name: "Invalid initial scale when cluster doesn't allow zero",

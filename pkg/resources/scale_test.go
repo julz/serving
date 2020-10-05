@@ -107,7 +107,7 @@ func TestGetScaleResource(t *testing.T) {
 	if got, want := scale.Status.Replicas, int32(5); got != want {
 		t.Errorf("GetScaleResource().Status.Replicas = %d, want: %d", got, want)
 	}
-	if got, want := scale.Spec.Selector.MatchLabels[serving.RevisionUID], "1982"; got != want {
+	if got, want := scale.Spec.Selector.MatchLabels[serving.RevisionUIDLabelKey], "1982"; got != want {
 		t.Errorf("GetScaleResource().Status.Selector = %q, want = %q", got, want)
 	}
 }
@@ -128,7 +128,7 @@ func newDeployment(ctx context.Context, t *testing.T, dynamicClient dynamic.Inte
 				"replicas": int64(replicas),
 				"selector": map[string]interface{}{
 					"matchLabels": map[string]interface{}{
-						serving.RevisionUID: "1982",
+						serving.RevisionUIDLabelKey: "1982",
 					},
 				},
 			},

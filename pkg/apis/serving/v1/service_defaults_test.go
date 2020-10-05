@@ -237,8 +237,8 @@ func TestAnnotateUserInfo(t *testing.T) {
 			a = map[string]string{}
 			s.SetAnnotations(a)
 		}
-		a[serving.CreatorAnnotation] = u1
-		a[serving.UpdaterAnnotation] = u2
+		a[serving.CreatorAnnotationKey] = u1
+		a[serving.UpdaterAnnotationKey] = u2
 		return s
 	}
 
@@ -254,8 +254,8 @@ func TestAnnotateUserInfo(t *testing.T) {
 		this: &Service{},
 		prev: nil,
 		wantAnns: map[string]string{
-			serving.CreatorAnnotation: u1,
-			serving.UpdaterAnnotation: u1,
+			serving.CreatorAnnotationKey: u1,
+			serving.UpdaterAnnotationKey: u1,
 		},
 	}, {
 		// Old objects don't have the annotation, and unless there's a change in
@@ -271,8 +271,8 @@ func TestAnnotateUserInfo(t *testing.T) {
 		this: withUserAnns(u1, u1, &Service{}),
 		prev: withUserAnns(u1, u1, &Service{}),
 		wantAnns: map[string]string{
-			serving.CreatorAnnotation: u1,
-			serving.UpdaterAnnotation: u1,
+			serving.CreatorAnnotationKey: u1,
+			serving.UpdaterAnnotationKey: u1,
 		},
 	}, {
 		name: "update-diff-old-object",
@@ -300,7 +300,7 @@ func TestAnnotateUserInfo(t *testing.T) {
 			},
 		},
 		wantAnns: map[string]string{
-			serving.UpdaterAnnotation: u2,
+			serving.UpdaterAnnotationKey: u2,
 		},
 	}, {
 		name: "update-diff-new-object",
@@ -328,8 +328,8 @@ func TestAnnotateUserInfo(t *testing.T) {
 			},
 		}),
 		wantAnns: map[string]string{
-			serving.CreatorAnnotation: u1,
-			serving.UpdaterAnnotation: u3,
+			serving.CreatorAnnotationKey: u1,
+			serving.UpdaterAnnotationKey: u3,
 		},
 	}}
 

@@ -38,8 +38,8 @@ func TestMakeSKS(t *testing.T) {
 			UID:       "2006",
 			// Those labels are propagated from the Revision->PA.
 			Labels: map[string]string{
-				serving.RevisionLabelKey: "with-you",
-				serving.RevisionUID:      "2009",
+				serving.RevisionLabelKey:    "with-you",
+				serving.RevisionUIDLabelKey: "2009",
 			},
 			Annotations: map[string]string{
 				"a": "b",
@@ -64,8 +64,8 @@ func TestMakeSKS(t *testing.T) {
 			Name:      "with-you",
 			// Those labels are propagated from the Revision->PA.
 			Labels: map[string]string{
-				serving.RevisionLabelKey: "with-you",
-				serving.RevisionUID:      "2009",
+				serving.RevisionLabelKey:    "with-you",
+				serving.RevisionUIDLabelKey: "2009",
 			},
 			Annotations: map[string]string{
 				"a": "b",

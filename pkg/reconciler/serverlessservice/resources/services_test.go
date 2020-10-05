@@ -42,8 +42,8 @@ func sks(mod func(*v1alpha1.ServerlessService)) *v1alpha1.ServerlessService {
 			UID:       "1982",
 			// Those labels are propagated from the Revision->PA.
 			Labels: map[string]string{
-				serving.RevisionLabelKey: "collie",
-				serving.RevisionUID:      "1982",
+				serving.RevisionLabelKey:    "collie",
+				serving.RevisionUIDLabelKey: "1982",
 			},
 			Annotations: map[string]string{},
 		},
@@ -64,10 +64,10 @@ func eps(mod func(*corev1.Endpoints)) *corev1.Endpoints {
 			Namespace: "melon",
 			Name:      "collie",
 			Labels: map[string]string{
-				serving.RevisionLabelKey:  "collie",
-				serving.RevisionUID:       "1982",
-				networking.SKSLabelKey:    "collie",
-				networking.ServiceTypeKey: "Public",
+				serving.RevisionLabelKey:    "collie",
+				serving.RevisionUIDLabelKey: "1982",
+				networking.SKSLabelKey:      "collie",
+				networking.ServiceTypeKey:   "Public",
 			},
 			OwnerReferences: []metav1.OwnerReference{{
 				APIVersion:         v1alpha1.SchemeGroupVersion.String(),
@@ -92,10 +92,10 @@ func svc(t networking.ServiceType, mods ...func(*corev1.Service)) *corev1.Servic
 			Name:      "collie",
 			Labels: map[string]string{
 				// Those should be propagated.
-				serving.RevisionLabelKey:  "collie",
-				serving.RevisionUID:       "1982",
-				networking.SKSLabelKey:    "collie",
-				networking.ServiceTypeKey: string(t),
+				serving.RevisionLabelKey:    "collie",
+				serving.RevisionUIDLabelKey: "1982",
+				networking.SKSLabelKey:      "collie",
+				networking.ServiceTypeKey:   string(t),
 			},
 			OwnerReferences: []metav1.OwnerReference{{
 				APIVersion:         v1alpha1.SchemeGroupVersion.String(),

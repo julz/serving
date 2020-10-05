@@ -201,19 +201,19 @@ func validateAnnotations(objs *v1test.ResourceObjects, extraKeys ...string) erro
 	// List of issues listing annotations that we check: #1642.
 
 	anns := objs.Service.GetAnnotations()
-	for _, a := range append([]string{serving.CreatorAnnotation, serving.UpdaterAnnotation}, extraKeys...) {
+	for _, a := range append([]string{serving.CreatorAnnotationKey, serving.UpdaterAnnotationKey}, extraKeys...) {
 		if got := anns[a]; got == "" {
 			return fmt.Errorf("service expected %s annotation to be set, but was empty", a)
 		}
 	}
 	anns = objs.Route.GetAnnotations()
-	for _, a := range append([]string{serving.CreatorAnnotation, serving.UpdaterAnnotation}, extraKeys...) {
+	for _, a := range append([]string{serving.CreatorAnnotationKey, serving.UpdaterAnnotationKey}, extraKeys...) {
 		if got := anns[a]; got == "" {
 			return fmt.Errorf("route expected %s annotation to be set, but was empty", a)
 		}
 	}
 	anns = objs.Config.GetAnnotations()
-	for _, a := range append([]string{serving.CreatorAnnotation, serving.UpdaterAnnotation}, extraKeys...) {
+	for _, a := range append([]string{serving.CreatorAnnotationKey, serving.UpdaterAnnotationKey}, extraKeys...) {
 		if got := anns[a]; got == "" {
 			return fmt.Errorf("config expected %s annotation to be set, but was empty", a)
 		}

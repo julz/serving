@@ -41,9 +41,9 @@ func TestMakeLabels(t *testing.T) {
 			},
 		},
 		want: map[string]string{
-			serving.RevisionLabelKey: "bar",
-			serving.RevisionUID:      "1234",
-			AppLabelKey:              "bar",
+			serving.RevisionLabelKey:    "bar",
+			serving.RevisionUIDLabelKey: "1234",
+			AppLabelKey:                 "bar",
 		},
 	}, {
 		name: "propagate user labels",
@@ -59,11 +59,11 @@ func TestMakeLabels(t *testing.T) {
 			},
 		},
 		want: map[string]string{
-			serving.RevisionLabelKey: "bar",
-			serving.RevisionUID:      "1234",
-			AppLabelKey:              "bar",
-			"ooga":                   "booga",
-			"unicorn":                "rainbows",
+			serving.RevisionLabelKey:    "bar",
+			serving.RevisionUIDLabelKey: "1234",
+			AppLabelKey:                 "bar",
+			"ooga":                      "booga",
+			"unicorn":                   "rainbows",
 		},
 	}, {
 		name: "override app label key",
@@ -78,9 +78,9 @@ func TestMakeLabels(t *testing.T) {
 			},
 		},
 		want: map[string]string{
-			serving.RevisionLabelKey: "bar",
-			serving.RevisionUID:      "1234",
-			AppLabelKey:              "my-app-override",
+			serving.RevisionLabelKey:    "bar",
+			serving.RevisionUIDLabelKey: "1234",
+			AppLabelKey:                 "my-app-override",
 		},
 	}}
 
@@ -92,7 +92,7 @@ func TestMakeLabels(t *testing.T) {
 			}
 
 			wantSelector := &metav1.LabelSelector{
-				MatchLabels: map[string]string{serving.RevisionUID: "1234"},
+				MatchLabels: map[string]string{serving.RevisionUIDLabelKey: "1234"},
 			}
 			gotSelector := makeSelector(test.rev)
 			if diff := cmp.Diff(wantSelector, gotSelector); diff != "" {

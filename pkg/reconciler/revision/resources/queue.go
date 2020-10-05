@@ -109,7 +109,7 @@ func createQueueResources(cfg *deployment.Config, annotations map[string]string,
 
 	var requestCPU, limitCPU, requestMemory, limitMemory resource.Quantity
 
-	if resourceFraction, ok := fractionFromPercentage(annotations, serving.QueueSideCarResourcePercentageAnnotation); ok {
+	if resourceFraction, ok := fractionFromPercentage(annotations, serving.QueueSideCarResourcePercentageAnnotationKey); ok {
 		if ok, requestCPU = computeResourceRequirements(userContainer.Resources.Requests.Cpu(), resourceFraction, queueContainerRequestCPU); ok {
 			resourceRequests[corev1.ResourceCPU] = requestCPU
 		}

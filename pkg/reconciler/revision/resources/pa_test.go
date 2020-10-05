@@ -63,9 +63,9 @@ func TestMakePA(t *testing.T) {
 				Namespace: "foo",
 				Name:      "bar",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "bar",
-					serving.RevisionUID:      "1234",
-					AppLabelKey:              "bar",
+					serving.RevisionLabelKey:    "bar",
+					serving.RevisionUIDLabelKey: "1234",
+					AppLabelKey:                 "bar",
 				},
 				Annotations: map[string]string{
 					"a": "b",
@@ -119,9 +119,9 @@ func TestMakePA(t *testing.T) {
 				Namespace: "blah",
 				Name:      "baz",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "baz",
-					serving.RevisionUID:      "4321",
-					AppLabelKey:              "baz",
+					serving.RevisionLabelKey:    "baz",
+					serving.RevisionUIDLabelKey: "4321",
+					AppLabelKey:                 "baz",
 				},
 				Annotations: map[string]string{},
 				OwnerReferences: []metav1.OwnerReference{{
@@ -172,9 +172,9 @@ func TestMakePA(t *testing.T) {
 				Namespace: "blah",
 				Name:      "baz",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "baz",
-					serving.RevisionUID:      "4321",
-					AppLabelKey:              "baz",
+					serving.RevisionLabelKey:    "baz",
+					serving.RevisionUIDLabelKey: "4321",
+					AppLabelKey:                 "baz",
 				},
 				Annotations: map[string]string{},
 				OwnerReferences: []metav1.OwnerReference{{
@@ -226,9 +226,9 @@ func TestMakePA(t *testing.T) {
 				Namespace: "blah",
 				Name:      "batman",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "batman",
-					serving.RevisionUID:      "4321",
-					AppLabelKey:              "batman",
+					serving.RevisionLabelKey:    "batman",
+					serving.RevisionUIDLabelKey: "4321",
+					AppLabelKey:                 "batman",
 				},
 				Annotations: map[string]string{},
 				OwnerReferences: []metav1.OwnerReference{{
@@ -284,9 +284,9 @@ func TestMakePA(t *testing.T) {
 				Namespace: "blah",
 				Name:      "robin",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "robin",
-					serving.RevisionUID:      "4321",
-					AppLabelKey:              "robin",
+					serving.RevisionLabelKey:    "robin",
+					serving.RevisionUIDLabelKey: "4321",
+					AppLabelKey:                 "robin",
 				},
 				Annotations: map[string]string{},
 				OwnerReferences: []metav1.OwnerReference{{

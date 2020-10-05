@@ -739,8 +739,8 @@ func TestServiceAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u2,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u2,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getServiceSpec("helloworld:foo"),
@@ -749,22 +749,22 @@ func TestServiceAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getServiceSpec("helloworld:foo"),
 		},
 		want: (&apis.FieldError{Message: "annotation value is immutable",
-			Paths: []string{serving.CreatorAnnotation}}).ViaField("metadata.annotations"),
+			Paths: []string{serving.CreatorAnnotationKey}}).ViaField("metadata.annotations"),
 	}, {
 		name: "update lastModifier without spec changes",
 		this: &Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u2,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u2,
 				},
 			},
 			Spec: getServiceSpec("helloworld:foo"),
@@ -773,21 +773,21 @@ func TestServiceAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getServiceSpec("helloworld:foo"),
 		},
-		want: apis.ErrInvalidValue(u2, serving.UpdaterAnnotation).ViaField("metadata.annotations"),
+		want: apis.ErrInvalidValue(u2, serving.UpdaterAnnotationKey).ViaField("metadata.annotations"),
 	}, {
 		name: "update lastModifier with spec changes",
 		this: &Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u3,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u3,
 				},
 			},
 			Spec: getServiceSpec("helloworld:bar"),
@@ -796,8 +796,8 @@ func TestServiceAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getServiceSpec("helloworld:foo"),

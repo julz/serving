@@ -84,8 +84,8 @@ func updateRevisionAnnotations(rev *v1.Revision, config metav1.Object) {
 
 	// Populate the CreatorAnnotation from configuration's Updater annotation.
 	cans := config.GetAnnotations()
-	if c, ok := cans[serving.UpdaterAnnotation]; ok {
-		annotations[serving.CreatorAnnotation] = c
+	if c, ok := cans[serving.UpdaterAnnotationKey]; ok {
+		annotations[serving.CreatorAnnotationKey] = c
 	}
 
 	if v, ok := cans[serving.RoutesAnnotationKey]; ok {

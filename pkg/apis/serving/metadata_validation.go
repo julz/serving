@@ -34,8 +34,8 @@ import (
 
 var (
 	allowedAnnotations = sets.NewString(
-		UpdaterAnnotation,
-		CreatorAnnotation,
+		UpdaterAnnotationKey,
+		CreatorAnnotationKey,
 		RevisionLastPinnedAnnotationKey,
 		RoutingStateModifiedAnnotationKey,
 		ForceUpgradeAnnotationKey,
@@ -80,16 +80,16 @@ func ValidateQueueSidecarAnnotation(annotations map[string]string) *apis.FieldEr
 	if len(annotations) == 0 {
 		return nil
 	}
-	v, ok := annotations[QueueSideCarResourcePercentageAnnotation]
+	v, ok := annotations[QueueSideCarResourcePercentageAnnotationKey]
 	if !ok {
 		return nil
 	}
 	value, err := strconv.ParseFloat(v, 64)
 	if err != nil {
-		return apis.ErrInvalidValue(v, apis.CurrentField).ViaKey(QueueSideCarResourcePercentageAnnotation)
+		return apis.ErrInvalidValue(v, apis.CurrentField).ViaKey(QueueSideCarResourcePercentageAnnotationKey)
 	}
 	if value < 0.1 || value > 100 {
-		return apis.ErrOutOfBoundsValue(value, 0.1, 100.0, apis.CurrentField).ViaKey(QueueSideCarResourcePercentageAnnotation)
+		return apis.ErrOutOfBoundsValue(value, 0.1, 100.0, apis.CurrentField).ViaKey(QueueSideCarResourcePercentageAnnotationKey)
 	}
 	return nil
 }
@@ -151,10 +151,10 @@ func SetUserInfo(ctx context.Context, oldSpec, newSpec, resource interface{}) {
 			if equality.Semantic.DeepEqual(oldSpec, newSpec) {
 				return
 			}
-			ans[UpdaterAnnotation] = ui.Username
+			ans[UpdaterAnnotationKey] = ui.Username
 		} else {
-			ans[CreatorAnnotation] = ui.Username
-			ans[UpdaterAnnotation] = ui.Username
+			ans[CreatorAnnotationKey] = ui.Username
+			ans[UpdaterAnnotationKey] = ui.Username
 		}
 	}
 }

@@ -42,8 +42,8 @@ var (
 func makeLabels(revision *v1.Revision) map[string]string {
 	labels := kmeta.FilterMap(revision.GetLabels(), excludeLabels.Has)
 	labels = kmeta.UnionMaps(labels, map[string]string{
-		serving.RevisionLabelKey: revision.Name,
-		serving.RevisionUID:      string(revision.UID),
+		serving.RevisionLabelKey:    revision.Name,
+		serving.RevisionUIDLabelKey: string(revision.UID),
 	})
 
 	// If users don't specify an app: label we will automatically
@@ -63,7 +63,7 @@ func makeAnnotations(revision *v1.Revision) map[string]string {
 func makeSelector(revision *v1.Revision) *metav1.LabelSelector {
 	return &metav1.LabelSelector{
 		MatchLabels: map[string]string{
-			serving.RevisionUID: string(revision.UID),
+			serving.RevisionUIDLabelKey: string(revision.UID),
 		},
 	}
 }

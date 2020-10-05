@@ -71,9 +71,9 @@ func TestMakeImageCache(t *testing.T) {
 				Namespace: "foo",
 				Name:      "bar-cache-user-container",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "bar",
-					serving.RevisionUID:      "1234",
-					AppLabelKey:              "bar",
+					serving.RevisionLabelKey:    "bar",
+					serving.RevisionUIDLabelKey: "1234",
+					AppLabelKey:                 "bar",
 				},
 				Annotations: map[string]string{
 					"a": "b",
@@ -134,9 +134,9 @@ func TestMakeImageCache(t *testing.T) {
 				Namespace: "foo",
 				Name:      "bar-cache-user-container1",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "bar",
-					serving.RevisionUID:      "1234",
-					AppLabelKey:              "bar",
+					serving.RevisionLabelKey:    "bar",
+					serving.RevisionUIDLabelKey: "1234",
+					AppLabelKey:                 "bar",
 				},
 				Annotations: map[string]string{
 					"a": "b",
@@ -192,9 +192,9 @@ func TestMakeImageCache(t *testing.T) {
 				Namespace: "foo",
 				Name:      "bar-cache-user-container",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "bar",
-					serving.RevisionUID:      "1234",
-					AppLabelKey:              "bar",
+					serving.RevisionLabelKey:    "bar",
+					serving.RevisionUIDLabelKey: "1234",
+					AppLabelKey:                 "bar",
 				},
 				Annotations: map[string]string{
 					"a": "b",
@@ -244,9 +244,9 @@ func TestMakeImageCache(t *testing.T) {
 				Namespace: "foo",
 				Name:      "bar-cache-user-container",
 				Labels: map[string]string{
-					serving.RevisionLabelKey: "bar",
-					serving.RevisionUID:      "1234",
-					AppLabelKey:              "bar",
+					serving.RevisionLabelKey:    "bar",
+					serving.RevisionUIDLabelKey: "1234",
+					AppLabelKey:                 "bar",
 				},
 				Annotations: map[string]string{},
 				OwnerReferences: []metav1.OwnerReference{{

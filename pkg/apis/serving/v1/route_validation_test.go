@@ -692,8 +692,8 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u2,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u2,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getRouteSpec("old"),
@@ -702,22 +702,22 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getRouteSpec("old"),
 		},
 		want: (&apis.FieldError{Message: "annotation value is immutable",
-			Paths: []string{serving.CreatorAnnotation}}).ViaField("metadata.annotations"),
+			Paths: []string{serving.CreatorAnnotationKey}}).ViaField("metadata.annotations"),
 	}, {
 		name: "update creator annotation with spec changes",
 		this: &Route{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u2,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u2,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getRouteSpec("new"),
@@ -726,22 +726,22 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getRouteSpec("old"),
 		},
 		want: (&apis.FieldError{Message: "annotation value is immutable",
-			Paths: []string{serving.CreatorAnnotation}}).ViaField("metadata.annotations"),
+			Paths: []string{serving.CreatorAnnotationKey}}).ViaField("metadata.annotations"),
 	}, {
 		name: "update lastModifier annotation without spec changes",
 		this: &Route{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u2,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u2,
 				},
 			},
 			Spec: getRouteSpec("old"),
@@ -750,21 +750,21 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getRouteSpec("old"),
 		},
-		want: apis.ErrInvalidValue(u2, serving.UpdaterAnnotation).ViaField("metadata.annotations"),
+		want: apis.ErrInvalidValue(u2, serving.UpdaterAnnotationKey).ViaField("metadata.annotations"),
 	}, {
 		name: "update lastModifier annotation with spec changes",
 		this: &Route{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u3,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u3,
 				},
 			},
 			Spec: getRouteSpec("new"),
@@ -773,8 +773,8 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getRouteSpec("old"),
@@ -786,8 +786,8 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u3,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u3,
 				},
 				OwnerReferences: []metav1.OwnerReference{{
 					APIVersion: "v1",
@@ -800,8 +800,8 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getRouteSpec("old"),
@@ -813,8 +813,8 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u3,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u3,
+					serving.UpdaterAnnotationKey: u1,
 				},
 				OwnerReferences: []metav1.OwnerReference{{
 					APIVersion: "v1",
@@ -827,8 +827,8 @@ func TestRouteAnnotationUpdate(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "valid",
 				Annotations: map[string]string{
-					serving.CreatorAnnotation: u1,
-					serving.UpdaterAnnotation: u1,
+					serving.CreatorAnnotationKey: u1,
+					serving.UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getRouteSpec("old"),

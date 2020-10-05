@@ -115,7 +115,7 @@ func TestValidateObjectMetadata(t *testing.T) {
 		objectMeta: &metav1.ObjectMeta{
 			GenerateName: "some-name",
 			Annotations: map[string]string{
-				CreatorAnnotation: "svc-creator",
+				CreatorAnnotationKey: "svc-creator",
 			},
 		},
 	}, {
@@ -123,7 +123,7 @@ func TestValidateObjectMetadata(t *testing.T) {
 		objectMeta: &metav1.ObjectMeta{
 			GenerateName: "some-name",
 			Annotations: map[string]string{
-				UpdaterAnnotation: "svc-modifier",
+				UpdaterAnnotationKey: "svc-modifier",
 			},
 		},
 	}, {
@@ -257,29 +257,29 @@ func TestValidateQueueSidecarAnnotation(t *testing.T) {
 	}{{
 		name: "too small",
 		annotation: map[string]string{
-			QueueSideCarResourcePercentageAnnotation: "0.01982",
+			QueueSideCarResourcePercentageAnnotationKey: "0.01982",
 		},
 		expectErr: &apis.FieldError{
 			Message: "expected 0.1 <= 0.01982 <= 100",
-			Paths:   []string{fmt.Sprintf("[%s]", QueueSideCarResourcePercentageAnnotation)},
+			Paths:   []string{fmt.Sprintf("[%s]", QueueSideCarResourcePercentageAnnotationKey)},
 		},
 	}, {
 		name: "too big for Queue sidecar resource percentage annotation",
 		annotation: map[string]string{
-			QueueSideCarResourcePercentageAnnotation: "100.0001",
+			QueueSideCarResourcePercentageAnnotationKey: "100.0001",
 		},
 		expectErr: &apis.FieldError{
 			Message: "expected 0.1 <= 100.0001 <= 100",
-			Paths:   []string{fmt.Sprintf("[%s]", QueueSideCarResourcePercentageAnnotation)},
+			Paths:   []string{fmt.Sprintf("[%s]", QueueSideCarResourcePercentageAnnotationKey)},
 		},
 	}, {
 		name: "Invalid queue sidecar resource percentage annotation",
 		annotation: map[string]string{
-			QueueSideCarResourcePercentageAnnotation: "",
+			QueueSideCarResourcePercentageAnnotationKey: "",
 		},
 		expectErr: &apis.FieldError{
 			Message: "invalid value: ",
-			Paths:   []string{fmt.Sprintf("[%s]", QueueSideCarResourcePercentageAnnotation)},
+			Paths:   []string{fmt.Sprintf("[%s]", QueueSideCarResourcePercentageAnnotationKey)},
 		},
 	}, {
 		name:       "empty annotation",
@@ -287,17 +287,17 @@ func TestValidateQueueSidecarAnnotation(t *testing.T) {
 	}, {
 		name: "different annotation other than QueueSideCarResourcePercentageAnnotation",
 		annotation: map[string]string{
-			CreatorAnnotation: "umph",
+			CreatorAnnotationKey: "umph",
 		},
 	}, {
 		name: "valid value for Queue sidecar resource percentage annotation",
 		annotation: map[string]string{
-			QueueSideCarResourcePercentageAnnotation: "0.1",
+			QueueSideCarResourcePercentageAnnotationKey: "0.1",
 		},
 	}, {
 		name: "valid value for Queue sidecar resource percentage annotation",
 		annotation: map[string]string{
-			QueueSideCarResourcePercentageAnnotation: "100",
+			QueueSideCarResourcePercentageAnnotationKey: "100",
 		},
 	}}
 
@@ -460,8 +460,8 @@ func TestAnnotationCreate(t *testing.T) {
 			Spec: getSpec("foo"),
 		},
 		want: map[string]string{
-			CreatorAnnotation: u1,
-			UpdaterAnnotation: u1,
+			CreatorAnnotationKey: u1,
+			UpdaterAnnotationKey: u1,
 		},
 	}, {
 		name: "create annotation should override user provided annotations",
@@ -469,15 +469,15 @@ func TestAnnotationCreate(t *testing.T) {
 		this: &withPod{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					CreatorAnnotation: u2,
-					UpdaterAnnotation: u2,
+					CreatorAnnotationKey: u2,
+					UpdaterAnnotationKey: u2,
 				},
 			},
 			Spec: getSpec("foo"),
 		},
 		want: map[string]string{
-			CreatorAnnotation: u1,
-			UpdaterAnnotation: u1,
+			CreatorAnnotationKey: u1,
+			UpdaterAnnotationKey: u1,
 		},
 	}}
 	for _, test := range tests {
@@ -511,8 +511,8 @@ func TestAnnotationUpdate(t *testing.T) {
 		this: &withPod{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					CreatorAnnotation: u1,
-					UpdaterAnnotation: u1,
+					CreatorAnnotationKey: u1,
+					UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getSpec("foo"),
@@ -521,8 +521,8 @@ func TestAnnotationUpdate(t *testing.T) {
 			Spec: getSpec("foo"),
 		},
 		want: map[string]string{
-			CreatorAnnotation: u1,
-			UpdaterAnnotation: u1,
+			CreatorAnnotationKey: u1,
+			UpdaterAnnotationKey: u1,
 		},
 	}, {
 		name: "update annotation with spec changes",
@@ -530,8 +530,8 @@ func TestAnnotationUpdate(t *testing.T) {
 		this: &withPod{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					CreatorAnnotation: u1,
-					UpdaterAnnotation: u1,
+					CreatorAnnotationKey: u1,
+					UpdaterAnnotationKey: u1,
 				},
 			},
 			Spec: getSpec("bar"),
@@ -540,8 +540,8 @@ func TestAnnotationUpdate(t *testing.T) {
 			Spec: getSpec("foo"),
 		},
 		want: map[string]string{
-			CreatorAnnotation: u1,
-			UpdaterAnnotation: u2,
+			CreatorAnnotationKey: u1,
+			UpdaterAnnotationKey: u2,
 		},
 	}}
 	for _, test := range tests {

@@ -192,9 +192,9 @@ var (
 			Namespace: "foo",
 			Name:      "bar-deployment",
 			Labels: map[string]string{
-				serving.RevisionLabelKey: "bar",
-				serving.RevisionUID:      "1234",
-				AppLabelKey:              "bar",
+				serving.RevisionLabelKey:    "bar",
+				serving.RevisionUIDLabelKey: "1234",
+				AppLabelKey:                 "bar",
 			},
 			Annotations: map[string]string{},
 			OwnerReferences: []metav1.OwnerReference{{
@@ -210,16 +210,16 @@ var (
 			Replicas: ptr.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					serving.RevisionUID: "1234",
+					serving.RevisionUIDLabelKey: "1234",
 				},
 			},
 			ProgressDeadlineSeconds: ptr.Int32(0),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						serving.RevisionLabelKey: "bar",
-						serving.RevisionUID:      "1234",
-						AppLabelKey:              "bar",
+						serving.RevisionLabelKey:    "bar",
+						serving.RevisionUIDLabelKey: "1234",
+						AppLabelKey:                 "bar",
 					},
 					Annotations: map[string]string{},
 				},

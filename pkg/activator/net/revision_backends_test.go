@@ -506,9 +506,9 @@ func epNotReady(revL string, port int32, portName string, readyIps, notReadyIps 
 		ObjectMeta: metav1.ObjectMeta{
 			Name: revL + "-ep",
 			Labels: map[string]string{
-				serving.RevisionUID:       time.Now().Format("150415.000"),
-				networking.ServiceTypeKey: string(networking.ServiceTypePrivate),
-				serving.RevisionLabelKey:  revL,
+				serving.RevisionUIDLabelKey: time.Now().Format("150415.000"),
+				networking.ServiceTypeKey:   string(networking.ServiceTypePrivate),
+				serving.RevisionLabelKey:    revL,
 			},
 		},
 		Subsets: []corev1.EndpointSubset{*epSubset(port, portName, readyIps, notReadyIps)},

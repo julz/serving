@@ -67,9 +67,9 @@ const (
 	// which Revision triggered their creation.
 	RevisionLabelKey = GroupName + "/revision"
 
-	// RevisionUID is the label key attached to a revision to indicate
+	// RevisionUIDLabelKey is the label key attached to a revision to indicate
 	// its unique identifier
-	RevisionUID = GroupName + "/revisionUID"
+	RevisionUIDLabelKey = GroupName + "/revisionUID"
 
 	// ServiceLabelKey is the label key attached to a Route and Configuration indicating by
 	// which Service they are created.
@@ -85,16 +85,16 @@ const (
 	// must continue to be allowed since it may be present on existing resources.
 	ForceUpgradeAnnotationKey = GroupName + "/forceUpgrade"
 
-	// CreatorAnnotation is the annotation key to describe the user that
+	// CreatorAnnotationKey is the annotation key to describe the user that
 	// created the resource.
-	CreatorAnnotation = GroupName + "/creator"
-	// UpdaterAnnotation is the annotation key to describe the user that
+	CreatorAnnotationKey = GroupName + "/creator"
+	// UpdaterAnnotationKey is the annotation key to describe the user that
 	// last updated the resource.
-	UpdaterAnnotation = GroupName + "/lastModifier"
+	UpdaterAnnotationKey = GroupName + "/lastModifier"
 
-	// QueueSideCarResourcePercentageAnnotation is the percentage of user container resources to be used for queue-proxy
+	// QueueSideCarResourcePercentageAnnotationKey is the percentage of user container resources to be used for queue-proxy
 	// It has to be in [0.1,100]
-	QueueSideCarResourcePercentageAnnotation = "queue.sidecar." + GroupName + "/resourcePercentage"
+	QueueSideCarResourcePercentageAnnotationKey = "queue.sidecar." + GroupName + "/resourcePercentage"
 
 	// VisibilityLabelKeyObsolete is the obsolete VisibilityLabelKey.
 	// This will move over to VisibilityLabelKey in networking repo..

@@ -405,7 +405,7 @@ func newRevisionBackendsManagerWithProbeFrequency(ctx context.Context, tr http.R
 	endpointsInformer := endpointsinformer.Get(ctx)
 	endpointsInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
 		FilterFunc: reconciler.ChainFilterFuncs(
-			reconciler.LabelExistsFilterFunc(serving.RevisionUID),
+			reconciler.LabelExistsFilterFunc(serving.RevisionUIDLabelKey),
 			// We are only interested in the private services, since that is
 			// what is populated by the actual revision backends.
 			reconciler.LabelFilterFunc(networking.ServiceTypeKey, string(networking.ServiceTypePrivate), false),
