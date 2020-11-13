@@ -637,7 +637,7 @@ func TestKnTCPProbeSuccessThresholdIncludesFailure(t *testing.T) {
 	}
 
 	if probeErr := <-errChan; !probeErr {
-		t.Error("Wanted ProbeContainer() successed but got error")
+		t.Error("Wanted ProbeContainer() to succeed, but got error")
 	}
 	if got := pb.count; got < successThreshold {
 		t.Errorf("Count = %d, want: %d", got, successThreshold)
