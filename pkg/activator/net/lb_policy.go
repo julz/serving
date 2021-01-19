@@ -21,7 +21,8 @@ package net
 import (
 	"context"
 	"math/rand"
-	"sync"
+
+	"go.uber.org/atomic"
 )
 
 // lbPolicy is a functor that selects a target pod from the list, or (noop, nil) if
@@ -84,26 +85,17 @@ func firstAvailableLBPolicy(ctx context.Context, targets []*podTracker) (func(),
 }
 
 func newRoundRobinPolicy() lbPolicy {
-	var (
-		mu  sync.Mutex
-		idx int
-	)
+	idx := atomic.NewInt64(-1)
 	return func(ctx context.Context, targets []*podTracker) (func(), *podTracker) {
-		mu.Lock()
-		defer mu.Unlock()
-		// The number of trackers might have shrunk, so reset to 0.
-		l := len(targets)
-		if idx >= l {
-			idx = 0
-		}
-
-		// Now for |targets| elements and check every next one in
-		// round robin fashion.
-		for i := 0; i < l; i++ {
-			p := (idx + i) % l
+		localIdx := idx.Inc()
+		for i := 0; i < len(targets); i++ {
+			p := (int(localIdx) + i) % len(targets)
 			if cb, ok := targets[p].Reserve(ctx); ok {
-				// We want to start with the next index.
-				idx = p + 1
+				// If the localIdx was busy, start with the one we ended up choosing next time.
+				if i > 0 {
+					idx.Store(int64(p))
+				}
+
 				return cb, targets[p]
 			}
 		}
