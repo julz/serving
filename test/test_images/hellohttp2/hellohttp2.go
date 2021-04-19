@@ -45,6 +45,6 @@ func main() {
 	flag.Parse()
 	log.Print("hellohttp2 app started.")
 
-	s := network.NewServer(":"+os.Getenv("PORT"), httpWrapper())
+	s := network.NewServer(os.ExpandEnv(":$PORT"), httpWrapper())
 	log.Fatal(s.ListenAndServe())
 }

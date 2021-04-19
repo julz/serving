@@ -92,7 +92,7 @@ func httpWrapper(g *grpc.Server) http.Handler {
 }
 
 func main() {
-	log.Print("Starting server on ", os.Getenv("PORT"))
+	log.Print(os.ExpandEnv("Starting server on $PORT"))
 
 	delay, _ = strconv.ParseInt(os.Getenv("DELAY"), 10, 64)
 	log.Printf("Using DELAY of %d ms", delay)
@@ -103,7 +103,7 @@ func main() {
 	}
 
 	g := grpc.NewServer()
-	s := network.NewServer(":"+os.Getenv("PORT"), httpWrapper(g))
+	s := network.NewServer(os.ExpandEnv(":$PORT"), httpWrapper(g))
 
 	ping.RegisterPingServiceServer(g, &server{})
 

@@ -87,5 +87,5 @@ func main() {
 	flag.Parse()
 	log.SetFlags(0)
 	h := network.NewProbeHandler(http.HandlerFunc(handler))
-	test.ListenAndServeGracefully(":"+os.Getenv("PORT"), h.ServeHTTP)
+	test.ListenAndServeGracefully(os.ExpandEnv(":$PORT"), h.ServeHTTP)
 }

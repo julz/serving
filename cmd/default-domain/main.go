@@ -100,7 +100,7 @@ func findGatewayAddress(ctx context.Context, kubeclient kubernetes.Interface, cl
 		},
 		Spec: v1alpha1.IngressSpec{
 			Rules: []v1alpha1.IngressRule{{
-				Hosts:      []string{os.Getenv("POD_NAME") + ".default-domain.invalid"},
+				Hosts:      []string{os.ExpandEnv("$POD_NAME.default-domain.invalid")},
 				Visibility: v1alpha1.IngressVisibilityExternalIP,
 				HTTP: &v1alpha1.HTTPIngressRuleValue{
 					Paths: []v1alpha1.HTTPIngressPath{{
