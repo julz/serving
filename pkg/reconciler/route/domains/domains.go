@@ -62,7 +62,7 @@ func GetAllDomainsAndTags(ctx context.Context, r *v1.Route, names []string, visi
 	return domainTagMap, nil
 }
 
-// DomainNameFromTemplate generates domain name base on the template specified in the `config-network` ConfigMap.
+// DomainNameFromTemplate generates domain name based on the template specified in the `config-network` ConfigMap.
 // name is the "subdomain" which will be referred as the "name" in the template
 func DomainNameFromTemplate(ctx context.Context, r metav1.ObjectMeta, name string) (string, error) {
 	domainConfig := config.FromContext(ctx).Domain
@@ -105,8 +105,8 @@ func DomainNameFromTemplate(ctx context.Context, r metav1.ObjectMeta, name strin
 	return buf.String(), nil
 }
 
-// HostnameFromTemplate generates domain name base on the template specified in the `config-network` ConfigMap.
-// name is the "subdomain" which will be referred as the "name" in the template
+// HostnameFromTemplate generates domain name based on the template specified in the `config-network` ConfigMap.
+// name is the "subdomain" which will be referred to as the "name" in the template.
 func HostnameFromTemplate(ctx context.Context, name, tag string) (string, error) {
 	if tag == "" {
 		return name, nil
